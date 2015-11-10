@@ -51,29 +51,27 @@ func (h *Hound) Sort() {
 }
 
 func (h *Hound) Sniff(fileName string, hunk *diff.Hunk) error {
-	r1, _ := regexp.Compile(`(?m)^\+\s*(.+)$`)
-	matches := r1.FindAllSubmatch(hunk.Body, -1)
-
-	r2, _ := regexp.Compile(`^\w+\/`)
-	fileName = r2.ReplaceAllString(fileName, "")
+	r1, _ := regexp.Compile(`^\w+\/`)
+	fileName = r1.ReplaceAllString(fileName, "")
 	if _, ok := h.MatchPatterns(h.Skips, []byte(fileName)); ok {
 		return nil
 	}
 
-	startLineNum := hunk.NewStartLine
+	r2, _ := regexp.Compile(`(?m)^\+\s*(.+)$`)
+	matches := r2.FindAllSubmatch(hunk.Body, -1)
 
 	for _, match := range matches {
 		line := match[1]
 
 		if pattern, ok := h.MatchPatterns(h.Warns, line); ok {
 			message := color.YellowString(fmt.Sprintf("Warning: pattern `%s` match found for `%s` starting at line %d in %s\n",
-				pattern, line, startLineNum, fileName))
+				pattern, line, hunk.NewStartLine, fileName))
 			fmt.Print(message)
 		}
 
 		if pattern, ok := h.MatchPatterns(h.Fails, line); ok {
 			err := color.RedString(fmt.Sprintf("Failure: pattern `%s` match found for `%s` starting at line %d in %s\n",
-				pattern, line, startLineNum, fileName))
+				pattern, line, hunk.NewStartLine, fileName))
 			return errors.New(err)
 		}
 	}
