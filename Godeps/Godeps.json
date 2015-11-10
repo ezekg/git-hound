@@ -1,0 +1,19 @@
+{
+	"ImportPath": "github.com/ezekg/git-hound",
+	"GoVersion": "go1.5.1",
+	"Deps": [
+		{
+			"ImportPath": "github.com/fatih/color",
+			"Comment": "v0.1-10-g8640971",
+			"Rev": "8640971291e54b520f781270275b7ed8762ac909"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "53feefa2559fb8dfa8d81baad31be332c97d6c77"
+		},
+		{
+			"ImportPath": "sourcegraph.com/sourcegraph/go-diff/diff",
+			"Rev": "7eefa0faf57871a70d7a2c368a454593f07797bc"
+		}
+	]
+}
