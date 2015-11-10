@@ -3,7 +3,7 @@
 Git plugin that helps prevent sensitive data from being committed by sniffing potential commits against regular expressions from a local `.githound.yml` file.
 
 ## Installation
-To install Hound, please use `go get`. If you don't have Go installed, [get it here](https://golang.org/dl/).
+To install Hound, please use `go get`. If you don't have Go installed, [get it here](https://golang.org/dl/). If you would like to grab a precompiled binary, head over to the [releases](https://github.com/ezekg/git-hound/releases) page. The precompiled Hound binaries have no external dependencies.
 
 ```
 go get github.com/ezekg/git-hound
