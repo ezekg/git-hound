@@ -26,7 +26,7 @@ func (c *Command) Exec(cmds ...string) (string, int) {
 			stdout.WriteString(fmt.Sprintf("%s\n", scanner.Bytes()))
 		}
 	}()
-  
+
 	if err := cmd.Start(); err != nil {
 		return "Failed to spawn command\n", 1
 	}
