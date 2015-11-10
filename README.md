@@ -9,7 +9,7 @@ To install Hound, please use `go get`. If you don't have Go installed, [get it h
 go get github.com/ezekg/git-hound
 ```
 
-**Alias `git add` inside `.bash_profile`:** _(optional)_
+**Alias `git add` inside `~/.bash(rc|_profile)`:** _(optional)_
 ```bash
 alias git='_() { if [[ "$1" == "add" ]]; then git-hound "$@"; else git "$@"; fi }; _'
 ```
