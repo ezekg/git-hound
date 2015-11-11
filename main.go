@@ -22,8 +22,6 @@ func main() {
 	hound := &Hound{Config: *config}
 	git := &Command{Bin: *bin}
 
-	out, code := git.Exec(flag.Args()...)
-
 	if _, ok := hound.New(); ok {
 		out, _ := git.Exec("diff", "-U0", "--staged")
 		fileDiffs, err := diff.ParseMultiFileDiff([]byte(out))
@@ -46,6 +44,7 @@ func main() {
 		}
 	}
 
+	out, code := git.Exec(flag.Args()...)
 	fmt.Print(out)
 	os.Exit(code)
 }
