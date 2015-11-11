@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/ezekg/git-hound/Godeps/_workspace/src/sourcegraph.com/sourcegraph/go-diff/diff"
-  "testing"
-  "io/ioutil"
-  "os"
+	"io/ioutil"
+	"os"
+	"testing"
 )
 
 func TestDiffs(t *testing.T) {
@@ -35,7 +35,7 @@ index 000000..000000 000000
 		t.Fatalf("Should fail - %s", err)
 	}
 
-	// Should warn
+	// Should pass but output warning
 	fileName, hunk = getDiff(`diff --git a/test2.go b/test2.go
 index 000000..000000 000000
 --- a/test2.go
@@ -43,7 +43,7 @@ index 000000..000000 000000
 @@ -1,2 +3,4 @@
 +// Username: something-secret`)
 	r, w, _ := os.Pipe()
-  os.Stdout = w
+	os.Stdout = w
 
 	if err := h.Sniff(fileName, hunk); err != nil {
 		w.Close()
@@ -52,7 +52,7 @@ index 000000..000000 000000
 	}
 
 	w.Close()
-  out, _ := ioutil.ReadAll(r)
+	out, _ := ioutil.ReadAll(r)
 	os.Stdout = rescueStdout
 
 	if len(out) <= 0 {
