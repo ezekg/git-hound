@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
-	"sort"
 )
 
 type Hound struct {
