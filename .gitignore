@@ -5,6 +5,7 @@
 
 # Folders
 releases/
+debian/
 _obj/
 _test/
 

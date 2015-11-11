@@ -30,8 +30,6 @@ func (h *Hound) New() (error, bool) {
 		return err, false
 	}
 
-	h.Sort()
-
 	return nil, true
 }
 
@@ -42,12 +40,6 @@ func (h *Hound) LoadConfig() ([]byte, error) {
 
 func (h *Hound) Parse(data []byte) error {
 	return yaml.Unmarshal(data, h)
-}
-
-func (h *Hound) Sort() {
-	sort.Strings(h.Fails)
-	sort.Strings(h.Warns)
-	sort.Strings(h.Skips)
 }
 
 func (h *Hound) Sniff(fileName string, hunk *diff.Hunk) error {
