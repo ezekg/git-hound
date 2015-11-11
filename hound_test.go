@@ -30,7 +30,7 @@ index 000000..000000 000000
 --- a/test1.go
 +++ b/test1.go
 @@ -1,2 +3,4 @@
-+// Password: something-secret`)
++Password: something-secret`)
 	if err := h.Sniff(fileName, hunk); err == nil {
 		t.Fatalf("Should fail - %s", err)
 	}
@@ -41,7 +41,7 @@ index 000000..000000 000000
 --- a/test2.go
 +++ b/test2.go
 @@ -1,2 +3,4 @@
-+// Username: something-secret`)
++Username: something-secret`)
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
@@ -65,7 +65,7 @@ index 000000..000000 000000
 --- a/test3.go
 +++ b/test3.go
 @@ -1,2 +3,4 @@
-+// Something that is okay to commit`)
++Something that is okay to commit`)
 	if err := h.Sniff(fileName, hunk); err != nil {
 		t.Fatalf("Should pass - %s", err)
 	}
@@ -76,7 +76,7 @@ index 000000..000000 000000
 --- a/test4.go
 +++ b/test4.go
 @@ -1,2 +3,4 @@
--// Password: something-secret`)
+-Password: something-secret`)
 	if err := h.Sniff(fileName, hunk); err != nil {
 		t.Fatalf("Should pass - %s", err)
 	}
@@ -85,6 +85,7 @@ index 000000..000000 000000
 func getDiff(diffContents string) (string, *diff.Hunk) {
 	fileDiff, _ := diff.ParseFileDiff([]byte(diffContents))
 	fileName := fileDiff.NewName
+
 	for _, hunk := range fileDiff.GetHunks() {
 		return fileName, hunk
 	}
