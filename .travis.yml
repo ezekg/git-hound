@@ -2,10 +2,14 @@ language: go
 go:
   - 1.5.1
   - tip
+sudo: false
 install:
   - export GOPATH="${TRAVIS_BUILD_DIR}/Godeps/_workspace:$GOPATH"
+  - go get -t -v github.com/kr/godep
   - go install
 script:
   - go vet
   - go -v test
-sudo: false
+addons:
+  code_climate:
+    repo_token: 6b69214f0cee69de0cea3e289e823b43addbc9653eb71da6d54c6b8f6ccc1199
