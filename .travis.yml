@@ -5,7 +5,7 @@ go:
 sudo: false
 install:
   - export GOPATH="${TRAVIS_BUILD_DIR}/Godeps/_workspace:$GOPATH"
-  - go get -t -v github.com/kr/godep
+  - go get -t -v github.com/tools/godep
   - godep restore
 script:
   - go vet
