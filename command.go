@@ -8,6 +8,7 @@ import (
 	"syscall"
 )
 
+// Command contains the binary executable to be run when executing commands
 type Command struct {
 	Bin string
 }
