@@ -18,7 +18,7 @@ type Hound struct {
 	Skips  []string `yaml:"skip"`
 }
 
-// New innitializes a new Hound instance by parsing regexp patterns from a
+// New initializes a new Hound instance by parsing regexp patterns from a
 // local configuration file to prepare for diff sniffing
 func (h *Hound) New() (bool, error) {
 	config, err := h.LoadConfig()
