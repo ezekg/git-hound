@@ -2,7 +2,10 @@ language: go
 go:
   - 1.5.1
   - tip
-install: go install
+install:
+  - export GOPATH="${TRAVIS_BUILD_DIR}/Godeps/_workspace:$GOPATH"
+  - go install
 script:
-  - go test
+  - go vet
+  - go -v test
 sudo: false
