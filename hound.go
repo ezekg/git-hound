@@ -36,7 +36,8 @@ func (h *Hound) New() (bool, error) {
 	return true, nil
 }
 
-// LoadConfig loads a local configuration file of regexp patterns
+// LoadConfig reads a local configuration file of regexp patterns and returns
+// the contents of the file
 func (h *Hound) LoadConfig() ([]byte, error) {
 	filename, _ := filepath.Abs(h.Config)
 	return ioutil.ReadFile(filename)
