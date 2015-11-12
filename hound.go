@@ -11,6 +11,8 @@ import (
 	"regexp"
 )
 
+// Hound contains the local configuration filename and all regexp patterns
+// used for sniffing git-diffs
 type Hound struct {
 	Config string
 	Fails  []string `yaml:"fail"`
