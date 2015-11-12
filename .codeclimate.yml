@@ -1,0 +1,11 @@
+engines:
+  golint:
+    enabled: true
+  gofmt:
+    enabled: true
+ratings:
+   paths:
+     - "*.go"
+exclude_paths:
+  - "Godeps/**/*"
+  - "*_test.go"
