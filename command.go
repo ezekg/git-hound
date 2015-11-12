@@ -12,6 +12,7 @@ type Command struct {
 	Bin string
 }
 
+// Exec runs the specified command and returns its output and exit code
 func (c *Command) Exec(cmds ...string) (string, int) {
 	cmd := exec.Command(c.Bin, cmds...)
 

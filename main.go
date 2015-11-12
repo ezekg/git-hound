@@ -22,7 +22,7 @@ func main() {
 	hound := &Hound{Config: *config}
 	git := &Command{Bin: *bin}
 
-	if _, ok := hound.New(); ok {
+	if ok, _ := hound.New(); ok {
 		out, _ := git.Exec("diff", "-U0", "--staged")
 		fileDiffs, err := diff.ParseMultiFileDiff([]byte(out))
 		if err != nil {
