@@ -1,4 +1,6 @@
 # Git Hound
+[![Travis](https://img.shields.io/travis/ezekg/git-hound.svg?style=flat-square)](https://travis-ci.org/ezekg/git-hound)
+[![Code Climate](https://img.shields.io/codeclimate/github/ezekg/git-hound.svg?style=flat-square)](https://codeclimate.com/github/ezekg/git-hound)
 
 Git plugin that helps prevent sensitive data from being committed by sniffing potential commits against regular expressions from a local `.githound.yml` file.
 
