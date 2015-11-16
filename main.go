@@ -8,9 +8,11 @@ import (
 	"os"
 )
 
-var noColor = flag.Bool("no-color", false, "Disable color output")
-var config = flag.String("config", ".githound.yml", "Hound config file")
-var bin = flag.String("bin", "git", "Executable binary to use for git command")
+var (
+	noColor = flag.Bool("no-color", false, "Disable color output")
+	config  = flag.String("config", ".githound.yml", "Hound config file")
+	bin     = flag.String("bin", "git", "Executable binary to use for git command")
+)
 
 func main() {
 	flag.Parse()
