@@ -36,8 +36,15 @@ func main() {
 			fileName := fileDiff.NewName
 			hunks := fileDiff.GetHunks()
 
-			for _, hunk := range hunks {
-				err := hound.Sniff(fileName, hunk)
+			errs := make(chan error)
+			go func() {
+				for _, hunk := range hunks {
+					errs <- hound.Sniff(fileName, hunk)
+				}
+				close(errs)
+			}()
+
+			for err := range errs {
 				if err != nil {
 					fmt.Print(err)
 					os.Exit(1)
