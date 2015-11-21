@@ -36,19 +36,20 @@ func main() {
 		errs := make(chan error)
 		var wg sync.WaitGroup
 
+		sniff := func(fileName string, hunk *diff.Hunk) {
+			errs <- func() error {
+				defer func() { wg.Done() }()
+				return hound.Sniff(fileName, hunk)
+			}()
+		}
+
 		for _, fileDiff := range fileDiffs {
 			fileName := fileDiff.NewName
 			hunks := fileDiff.GetHunks()
 
 			for _, hunk := range hunks {
 				wg.Add(1)
-
-				go func() {
-					errs <- func() error {
-						defer func() { wg.Done() }()
-						return hound.Sniff(fileName, hunk)
-					}()
-				}()
+				go sniff(fileName, hunk)
 			}
 		}
 
