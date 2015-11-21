@@ -6,6 +6,7 @@ import (
 	"github.com/ezekg/git-hound/Godeps/_workspace/src/github.com/fatih/color"
 	"github.com/ezekg/git-hound/Godeps/_workspace/src/sourcegraph.com/sourcegraph/go-diff/diff"
 	"os"
+	"sync"
 )
 
 func main() {
@@ -32,17 +33,27 @@ func main() {
 			os.Exit(1)
 		}
 
+		errs := make(chan error)
+		var wg sync.WaitGroup
+
 		for _, fileDiff := range fileDiffs {
 			fileName := fileDiff.NewName
 			hunks := fileDiff.GetHunks()
 
-			errs := make(chan error)
-			go func() {
-				for _, hunk := range hunks {
-					errs <- hound.Sniff(fileName, hunk)
-				}
-				close(errs)
-			}()
+			for _, hunk := range hunks {
+				wg.Add(1)
+
+				go func() {
+					errs <- func() error {
+						defer func() { wg.Done() }()
+						return hound.Sniff(fileName, hunk)
+					}()
+				}()
+			}
+		}
+
+		go func() {
+			wg.Wait()
 
 			for err := range errs {
 				if err != nil {
@@ -50,7 +61,7 @@ func main() {
 					os.Exit(1)
 				}
 			}
-		}
+		}()
 	}
 
 	out, code := git.Exec(flag.Args()...)
