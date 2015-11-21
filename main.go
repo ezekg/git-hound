@@ -38,7 +38,7 @@ func main() {
 
 		sniff := func(fileName string, hunk *diff.Hunk) {
 			errs <- func() error {
-				defer func() { wg.Done() }()
+				defer wg.Done()
 				return hound.Sniff(fileName, hunk)
 			}()
 		}
@@ -47,8 +47,9 @@ func main() {
 			fileName := fileDiff.NewName
 			hunks := fileDiff.GetHunks()
 
+			wg.Add(len(hunks))
+
 			for _, hunk := range hunks {
-				wg.Add(1)
 				go sniff(fileName, hunk)
 			}
 		}
