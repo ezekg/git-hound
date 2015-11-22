@@ -2,10 +2,10 @@
 [![Travis](https://img.shields.io/travis/ezekg/git-hound.svg?style=flat-square)](https://travis-ci.org/ezekg/git-hound)
 [![Code Climate](https://img.shields.io/codeclimate/github/ezekg/git-hound.svg?style=flat-square)](https://codeclimate.com/github/ezekg/git-hound)
 
-Git plugin that helps prevent sensitive data from being committed by sniffing potential commits against regular expressions from a local `.githound.yml` file.
+Hound is a Git plugin that helps prevent sensitive data from being committed into a repository by sniffing potential commits against regular expressions.
 
 ## How does it work?
-Upon commit, it runs the output of `git diff -U0 --staged` through the Hound, which matches every _added_ or _modified_ line against your provided list of regular expressions.
+Upon commit, it runs the output of `git diff -U0 --staged` through the Hound, which matches every _added_ or _modified_ line against your provided list of regular expressions from a local `.githound.yml` file.
 
 ## Installation
 To install Hound, please use `go get`. If you don't have Go installed, [get it here](https://golang.org/dl/). If you would like to grab a precompiled binary, head over to the [releases](https://github.com/ezekg/git-hound/releases) page. The precompiled Hound binaries have no external dependencies.
