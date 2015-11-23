@@ -9,6 +9,7 @@ before_install:
 script:
   - go vet
   - go test -v
+  - go test -race
 addons:
   code_climate:
     repo_token: 6b69214f0cee69de0cea3e289e823b43addbc9653eb71da6d54c6b8f6ccc1199
