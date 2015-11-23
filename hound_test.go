@@ -2,83 +2,107 @@ package main
 
 import (
 	"github.com/ezekg/git-hound/Godeps/_workspace/src/sourcegraph.com/sourcegraph/go-diff/diff"
-	"io/ioutil"
-	"os"
 	"testing"
 )
 
 func TestDiffs(t *testing.T) {
-	rescueStdout := os.Stdout
 	var fileName string
 	var hunk *diff.Hunk
 
-	h := &Hound{}
-	c := []byte(`
+	warnc := make(chan string, 1)
+	failc := make(chan error, 1)
+	donec := make(chan bool, 1)
+
+	hound := &Hound{}
+	config := []byte(`
 warn:
   - '(?i)user(name)?\W*[:=,]\W*.+$'
 fail:
   - '(?i)pass(word)?\W*[:=,]\W*.+$'
 `)
 
-	if err := h.Parse(c); err != nil {
+	if err := hound.Parse(config); err != nil {
 		t.Fatalf("Should parse - %s", err)
 	}
 
 	// Should fail
-	fileName, hunk = getDiff(`diff --git a/test1.go b/test1.go
+	{
+		fileName, hunk = getDiff(`diff --git a/test1.go b/test1.go
 index 000000..000000 000000
 --- a/test1.go
 +++ b/test1.go
 @@ -1,2 +3,4 @@
 +Password: something-secret`)
-	if err := h.Sniff(fileName, hunk); err == nil {
-		t.Fatalf("Should fail - %s", err)
+		go hound.Sniff(fileName, hunk, warnc, failc, donec)
+
+		select {
+		case <-failc:
+			break
+		case <-warnc:
+			t.Fatalf("Should not warn")
+		case <-donec:
+			t.Fatalf("Should receive message")
+		}
 	}
 
 	// Should pass but output warning
-	fileName, hunk = getDiff(`diff --git a/test2.go b/test2.go
+	{
+		fileName, hunk = getDiff(`diff --git a/test2.go b/test2.go
 index 000000..000000 000000
 --- a/test2.go
 +++ b/test2.go
 @@ -1,2 +3,4 @@
 +Username: something-secret`)
-	r, w, _ := os.Pipe()
-	os.Stdout = w
+		go hound.Sniff(fileName, hunk, warnc, failc, donec)
 
-	if err := h.Sniff(fileName, hunk); err != nil {
-		w.Close()
-		os.Stdout = rescueStdout
-		t.Fatalf("Should pass - %s", err)
-	}
-
-	w.Close()
-	out, _ := ioutil.ReadAll(r)
-	os.Stdout = rescueStdout
-
-	if len(out) <= 0 {
-		t.Fatalf("Should warn - %s", out)
+		select {
+		case <-failc:
+			t.Fatalf("Should not fail")
+		case <-warnc:
+			break
+		case <-donec:
+			t.Fatalf("Should receive message")
+		}
 	}
 
 	// Should pass
-	fileName, hunk = getDiff(`diff --git a/test3.go b/test3.go
+	{
+		fileName, hunk = getDiff(`diff --git a/test3.go b/test3.go
 index 000000..000000 000000
 --- a/test3.go
 +++ b/test3.go
 @@ -1,2 +3,4 @@
 +Something that is okay to commit`)
-	if err := h.Sniff(fileName, hunk); err != nil {
-		t.Fatalf("Should pass - %s", err)
+		go hound.Sniff(fileName, hunk, warnc, failc, donec)
+
+		select {
+		case <-failc:
+			t.Fatal("Should not fail")
+		case <-warnc:
+			t.Fatal("Should not warn")
+		case <-donec:
+			break
+		}
 	}
 
 	// Should only pay attention to added lines and pass
-	fileName, hunk = getDiff(`diff --git a/test4.go b/test4.go
+	{
+		fileName, hunk = getDiff(`diff --git a/test4.go b/test4.go
 index 000000..000000 000000
 --- a/test4.go
 +++ b/test4.go
 @@ -1,2 +3,4 @@
 -Password: something-secret`)
-	if err := h.Sniff(fileName, hunk); err != nil {
-		t.Fatalf("Should pass - %s", err)
+		go hound.Sniff(fileName, hunk, warnc, failc, donec)
+
+		select {
+		case <-failc:
+			t.Fatal("Should not fail")
+		case <-warnc:
+			t.Fatal("Should not warn")
+		case <-donec:
+			break
+		}
 	}
 }
 
