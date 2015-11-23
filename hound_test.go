@@ -9,9 +9,9 @@ func TestDiffs(t *testing.T) {
 	var fileName string
 	var hunk *diff.Hunk
 
-	warnc := make(chan string, 1)
-	failc := make(chan error, 1)
-	donec := make(chan bool, 1)
+	warnc := make(chan string)
+	failc := make(chan error)
+	donec := make(chan bool)
 
 	hound := &Hound{}
 	config := []byte(`
