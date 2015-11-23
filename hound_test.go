@@ -12,6 +12,8 @@ warn:
   - '(?i)user(name)?\W*[:=,]\W*.+$'
 fail:
   - '(?i)pass(word)?\W*[:=,]\W*.+$'
+skip:
+  - '\.test$'
 `)
 
 	if err := hound.Parse(config); err != nil {
@@ -98,6 +100,30 @@ index 000000..000000 000000
 +++ b/test4.go
 @@ -1,2 +3,4 @@
 -Password: something-secret`)
+		warnc := make(chan string)
+		failc := make(chan error)
+		donec := make(chan bool)
+
+		go hound.Sniff(fileName, hunk, warnc, failc, donec)
+
+		select {
+		case <-failc:
+			t.Fatal("Should not fail")
+		case <-warnc:
+			t.Fatal("Should not warn")
+		case <-donec:
+			break
+		}
+	}
+
+	// Should skip even with failures
+	{
+		fileName, hunk := getDiff(`diff --git a/test4.test b/test4.test
+index 000000..000000 000000
+--- a/test4.test
++++ b/test4.test
+@@ -1,2 +3,4 @@
++Password: something-secret`)
 		warnc := make(chan string)
 		failc := make(chan error)
 		donec := make(chan bool)
