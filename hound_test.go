@@ -101,7 +101,7 @@ index 000000..000000 000000
 		warnc := make(chan string)
 		failc := make(chan error)
 		donec := make(chan bool)
-		
+
 		go hound.Sniff(fileName, hunk, warnc, failc, donec)
 
 		select {

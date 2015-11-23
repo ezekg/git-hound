@@ -66,7 +66,7 @@ func main() {
 		}
 
 		if failCount > 0 {
-			fmt.Printf("%d failures detected. Please fix them before you can commit.\n", failCount)
+			fmt.Printf("%d failures detected - please fix them before you can commit.\n", failCount)
 			os.Exit(1)
 		}
 	}

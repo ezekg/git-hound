@@ -67,14 +67,14 @@ func (h *Hound) Sniff(fileName string, hunk *diff.Hunk, warnc chan string, failc
 
 		if pattern, warned := h.MatchPatterns(h.Warns, line); warned {
 			msg := color.YellowString(fmt.Sprintf(
-				"Warning: pattern `%s` match found for `%s` starting at line %d in %s\n",
+				"warning: pattern `%s` match found for `%s` starting at line %d in %s\n",
 				pattern, line, hunk.NewStartLine, fileName))
 			warnc <- msg
 		}
 
 		if pattern, failed := h.MatchPatterns(h.Fails, line); failed {
 			msg := color.RedString(fmt.Sprintf(
-				"Failure: pattern `%s` match found for `%s` starting at line %d in %s\n",
+				"failure: pattern `%s` match found for `%s` starting at line %d in %s\n",
 				pattern, line, hunk.NewStartLine, fileName))
 			failc <- errors.New(msg)
 		}
