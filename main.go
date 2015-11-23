@@ -1,5 +1,5 @@
 /*
-Hound is a Git plugin that helps prevent sensitive data from being committed
+Command git-hound is a Git plugin that helps prevent sensitive data from being committed
 into a repository by sniffing potential commits against regular expressions
 */
 package main
