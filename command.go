@@ -8,12 +8,12 @@ import (
 	"syscall"
 )
 
-// Command contains the binary executable to be run when executing commands
+// A Command contains the binary executable to be run when executing commands.
 type Command struct {
 	Bin string
 }
 
-// Exec runs the specified command and returns its output and exit code
+// Exec runs the specified command and returns its output and exit code.
 func (c *Command) Exec(cmds ...string) (string, int) {
 	cmd := exec.Command(c.Bin, cmds...)
 

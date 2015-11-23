@@ -11,8 +11,8 @@ import (
 	"regexp"
 )
 
-// Hound contains the local configuration filename and all regexp patterns
-// used for sniffing git-diffs
+// A Hound contains the local configuration filename and all regexp patterns
+// used for sniffing git-diffs.
 type Hound struct {
 	Config string
 	Fails  []string `yaml:"fail"`
@@ -21,7 +21,7 @@ type Hound struct {
 }
 
 // New initializes a new Hound instance by parsing regexp patterns from a
-// local configuration file to prepare for diff sniffing
+// local configuration file and returns a status bool.
 func (h *Hound) New() bool {
 	config, err := h.LoadConfig()
 	if err != nil {
@@ -37,19 +37,19 @@ func (h *Hound) New() bool {
 }
 
 // LoadConfig reads a local configuration file of regexp patterns and returns
-// the contents of the file
+// the contents of the file.
 func (h *Hound) LoadConfig() ([]byte, error) {
 	filename, _ := filepath.Abs(h.Config)
 	return ioutil.ReadFile(filename)
 }
 
-// Parse parses a configuration byte array
+// Parse parses a configuration byte array and returns an error.
 func (h *Hound) Parse(data []byte) error {
 	return yaml.Unmarshal(data, h)
 }
 
 // Sniff matches the passed git-diff hunk against all regexp patterns that
-// were parsed from the local configuration
+// were parsed from the local configuration.
 func (h *Hound) Sniff(fileName string, hunk *diff.Hunk, warnc chan string, failc chan error, donec chan bool) {
 	r1, _ := regexp.Compile(`^\w+\/`)
 	fileName = r1.ReplaceAllString(fileName, "")
@@ -82,7 +82,7 @@ func (h *Hound) Sniff(fileName string, hunk *diff.Hunk, warnc chan string, failc
 	donec <- true
 }
 
-// Match matches a byte array against a regexp pattern
+// Match matches a byte array against a regexp pattern and returns a bool.
 func (h *Hound) Match(pattern string, subject []byte) bool {
 	r, err := regexp.Compile(pattern)
 	if err != nil {
@@ -92,7 +92,8 @@ func (h *Hound) Match(pattern string, subject []byte) bool {
 	return r.Match(subject)
 }
 
-// MatchPatterns matches a byte array against an array of regexp patterns
+// MatchPatterns matches a byte array against an array of regexp patterns and
+// returns the matched pattern and a bool.
 func (h *Hound) MatchPatterns(patterns []string, subject []byte) (string, bool) {
 	for _, pattern := range patterns {
 		if match := h.Match(pattern, subject); match {
