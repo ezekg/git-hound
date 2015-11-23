@@ -51,6 +51,8 @@ func (h *Hound) Parse(data []byte) error {
 // Sniff matches the passed git-diff hunk against all regexp patterns that
 // were parsed from the local configuration.
 func (h *Hound) Sniff(fileName string, hunk *diff.Hunk, warnc chan string, failc chan error, donec chan bool) {
+	defer func() { donec <- true }()
+
 	r1, _ := regexp.Compile(`^\w+\/`)
 	fileName = r1.ReplaceAllString(fileName, "")
 	if _, ok := h.MatchPatterns(h.Skips, []byte(fileName)); ok {
@@ -75,11 +77,8 @@ func (h *Hound) Sniff(fileName string, hunk *diff.Hunk, warnc chan string, failc
 				"Failure: pattern `%s` match found for `%s` starting at line %d in %s\n",
 				pattern, line, hunk.NewStartLine, fileName))
 			failc <- errors.New(msg)
-			return
 		}
 	}
-
-	donec <- true
 }
 
 // Match matches a byte array against a regexp pattern and returns a bool.

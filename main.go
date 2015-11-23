@@ -37,6 +37,8 @@ func main() {
 		}
 
 		hunkCount := 0
+		errCount := 0
+
 		warnc := make(chan string)
 		failc := make(chan error)
 		donec := make(chan bool)
@@ -57,10 +59,15 @@ func main() {
 				fmt.Print(msg)
 			case err := <-failc:
 				fmt.Print(err)
-				os.Exit(1)
+				errCount++
 			case <-donec:
 				c++
 			}
+		}
+
+		if errCount > 0 {
+			fmt.Printf("%d failures detected. Please fix them before you can commit.\n", errCount)
+			os.Exit(1)
 		}
 	}
 

@@ -6,13 +6,6 @@ import (
 )
 
 func TestDiffs(t *testing.T) {
-	var fileName string
-	var hunk *diff.Hunk
-
-	warnc := make(chan string)
-	failc := make(chan error)
-	donec := make(chan bool)
-
 	hound := &Hound{}
 	config := []byte(`
 warn:
@@ -27,12 +20,16 @@ fail:
 
 	// Should fail
 	{
-		fileName, hunk = getDiff(`diff --git a/test1.go b/test1.go
+		fileName, hunk := getDiff(`diff --git a/test1.go b/test1.go
 index 000000..000000 000000
 --- a/test1.go
 +++ b/test1.go
 @@ -1,2 +3,4 @@
 +Password: something-secret`)
+		warnc := make(chan string)
+		failc := make(chan error)
+		donec := make(chan bool)
+
 		go hound.Sniff(fileName, hunk, warnc, failc, donec)
 
 		select {
@@ -47,12 +44,16 @@ index 000000..000000 000000
 
 	// Should pass but output warning
 	{
-		fileName, hunk = getDiff(`diff --git a/test2.go b/test2.go
+		fileName, hunk := getDiff(`diff --git a/test2.go b/test2.go
 index 000000..000000 000000
 --- a/test2.go
 +++ b/test2.go
 @@ -1,2 +3,4 @@
 +Username: something-secret`)
+		warnc := make(chan string)
+		failc := make(chan error)
+		donec := make(chan bool)
+
 		go hound.Sniff(fileName, hunk, warnc, failc, donec)
 
 		select {
@@ -67,12 +68,16 @@ index 000000..000000 000000
 
 	// Should pass
 	{
-		fileName, hunk = getDiff(`diff --git a/test3.go b/test3.go
+		fileName, hunk := getDiff(`diff --git a/test3.go b/test3.go
 index 000000..000000 000000
 --- a/test3.go
 +++ b/test3.go
 @@ -1,2 +3,4 @@
 +Something that is okay to commit`)
+		warnc := make(chan string)
+		failc := make(chan error)
+		donec := make(chan bool)
+
 		go hound.Sniff(fileName, hunk, warnc, failc, donec)
 
 		select {
@@ -87,12 +92,16 @@ index 000000..000000 000000
 
 	// Should only pay attention to added lines and pass
 	{
-		fileName, hunk = getDiff(`diff --git a/test4.go b/test4.go
+		fileName, hunk := getDiff(`diff --git a/test4.go b/test4.go
 index 000000..000000 000000
 --- a/test4.go
 +++ b/test4.go
 @@ -1,2 +3,4 @@
 -Password: something-secret`)
+		warnc := make(chan string)
+		failc := make(chan error)
+		donec := make(chan bool)
+		
 		go hound.Sniff(fileName, hunk, warnc, failc, donec)
 
 		select {
