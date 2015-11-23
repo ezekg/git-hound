@@ -48,7 +48,15 @@ func main() {
 			hunks := fileDiff.GetHunks()
 
 			for _, hunk := range hunks {
-				go hound.Sniff(fileName, hunk, warnc, failc, donec)
+				go func(hunk *diff.Hunk) {
+					defer func() {
+						if r := recover(); r != nil {
+							fmt.Print(color.RedString(fmt.Sprintf("%s\n", r)))
+							os.Exit(1)
+						}
+					}()
+					hound.Sniff(fileName, hunk, warnc, failc, donec)
+				}(hunk)
 				hunkCount++
 			}
 		}

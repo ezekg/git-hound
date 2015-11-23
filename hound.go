@@ -85,7 +85,7 @@ func (h *Hound) Sniff(fileName string, hunk *diff.Hunk, warnc chan string, failc
 func (h *Hound) Match(pattern string, subject []byte) bool {
 	r, err := regexp.Compile(pattern)
 	if err != nil {
-		return false
+		panic(err)
 	}
 
 	return r.Match(subject)
