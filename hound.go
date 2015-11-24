@@ -1,9 +1,6 @@
 package main
 
 import (
-	"errors"
-	"fmt"
-	"github.com/ezekg/git-hound/Godeps/_workspace/src/github.com/fatih/color"
 	"github.com/ezekg/git-hound/Godeps/_workspace/src/gopkg.in/yaml.v2"
 	"github.com/ezekg/git-hound/Godeps/_workspace/src/sourcegraph.com/sourcegraph/go-diff/diff"
 	"io/ioutil"
@@ -14,21 +11,21 @@ import (
 // A Hound contains the local configuration filename and all regexp patterns
 // used for sniffing git-diffs.
 type Hound struct {
-	Config string
 	Fails  []string `yaml:"fail"`
 	Warns  []string `yaml:"warn"`
 	Skips  []string `yaml:"skip"`
+	config string
 }
 
 // New initializes a new Hound instance by parsing regexp patterns from a
 // local configuration file and returns a status bool.
 func (h *Hound) New() bool {
-	config, err := h.LoadConfig()
+	config, err := h.loadConfig()
 	if err != nil {
 		return false
 	}
 
-	err = h.Parse(config)
+	err = h.parse(config)
 	if err != nil {
 		return false
 	}
@@ -36,53 +33,59 @@ func (h *Hound) New() bool {
 	return true
 }
 
-// LoadConfig reads a local configuration file of regexp patterns and returns
-// the contents of the file.
-func (h *Hound) LoadConfig() ([]byte, error) {
-	filename, _ := filepath.Abs(h.Config)
-	return ioutil.ReadFile(filename)
-}
-
-// Parse parses a configuration byte array and returns an error.
-func (h *Hound) Parse(data []byte) error {
-	return yaml.Unmarshal(data, h)
-}
-
 // Sniff matches the passed git-diff hunk against all regexp patterns that
 // were parsed from the local configuration.
-func (h *Hound) Sniff(fileName string, hunk *diff.Hunk, warnc chan string, failc chan error, donec chan bool) {
-	defer func() { donec <- true }()
+func (h *Hound) Sniff(fileName string, hunk *diff.Hunk, smells chan<- smell, done chan<- bool) {
+	defer func() { done <- true }()
 
-	r1, _ := regexp.Compile(`^\w+\/`)
-	fileName = r1.ReplaceAllString(fileName, "")
-	if _, ok := h.MatchPatterns(h.Skips, []byte(fileName)); ok {
+	rxFileName, _ := regexp.Compile(`^\w+\/`)
+	fileName = rxFileName.ReplaceAllString(fileName, "")
+	if _, ok := h.matchPatterns(h.Skips, []byte(fileName)); ok {
 		return
 	}
 
-	r2, _ := regexp.Compile(`(?m)^\+\s*(.+)$`)
-	matches := r2.FindAllSubmatch(hunk.Body, -1)
+	rxModLines, _ := regexp.Compile(`(?m)^\+\s*(.+)$`)
+	matches := rxModLines.FindAllSubmatch(hunk.Body, -1)
 
 	for _, match := range matches {
 		line := match[1]
 
-		if pattern, warned := h.MatchPatterns(h.Warns, line); warned {
-			msg := color.YellowString(fmt.Sprintf(
-				"warning: pattern `%s` match found for `%s` starting at line %d in %s\n",
-				pattern, line, hunk.NewStartLine, fileName))
-			warnc <- msg
+		if pattern, warned := h.matchPatterns(h.Warns, line); warned {
+			smells <- smell{
+				pattern:  pattern,
+				fileName: fileName,
+				line:     line,
+				lineNum:  hunk.NewStartLine,
+				severity: 1,
+			}
 		}
 
-		if pattern, failed := h.MatchPatterns(h.Fails, line); failed {
-			msg := color.RedString(fmt.Sprintf(
-				"failure: pattern `%s` match found for `%s` starting at line %d in %s\n",
-				pattern, line, hunk.NewStartLine, fileName))
-			failc <- errors.New(msg)
+		if pattern, failed := h.matchPatterns(h.Fails, line); failed {
+			smells <- smell{
+				pattern:  pattern,
+				fileName: fileName,
+				line:     line,
+				lineNum:  hunk.NewStartLine,
+				severity: 2,
+			}
 		}
 	}
 }
 
-// Match matches a byte array against a regexp pattern and returns a bool.
-func (h *Hound) Match(pattern string, subject []byte) bool {
+// loadConfig reads a local configuration file of regexp patterns and returns
+// the contents of the file.
+func (h *Hound) loadConfig() ([]byte, error) {
+	filename, _ := filepath.Abs(h.config)
+	return ioutil.ReadFile(filename)
+}
+
+// parse parses a configuration byte array and returns an error.
+func (h *Hound) parse(config []byte) error {
+	return yaml.Unmarshal(config, h)
+}
+
+// match matches a byte array against a regexp pattern and returns a bool.
+func (h *Hound) match(pattern string, subject []byte) bool {
 	r, err := regexp.Compile(pattern)
 	if err != nil {
 		panic(err)
@@ -91,11 +94,11 @@ func (h *Hound) Match(pattern string, subject []byte) bool {
 	return r.Match(subject)
 }
 
-// MatchPatterns matches a byte array against an array of regexp patterns and
+// matchPatterns matches a byte array against an array of regexp patterns and
 // returns the matched pattern and a bool.
-func (h *Hound) MatchPatterns(patterns []string, subject []byte) (string, bool) {
+func (h *Hound) matchPatterns(patterns []string, subject []byte) (string, bool) {
 	for _, pattern := range patterns {
-		if match := h.Match(pattern, subject); match {
+		if match := h.match(pattern, subject); match {
 			return pattern, true
 		}
 	}

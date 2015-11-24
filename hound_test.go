@@ -16,133 +16,199 @@ skip:
   - '\.test$'
 `)
 
-	if err := hound.Parse(config); err != nil {
+	if err := hound.parse(config); err != nil {
 		t.Fatalf("Should parse - %s", err)
 	}
 
-	// Should fail
+	// Should fail with a warning
 	{
-		fileName, hunk := getDiff(`diff --git a/test1.go b/test1.go
+		fileName, hunk := getDiff(t, `diff --git a/test1.go b/test1.go
 index 000000..000000 000000
 --- a/test1.go
 +++ b/test1.go
 @@ -1,2 +3,4 @@
-+Password: something-secret`)
-		warnc := make(chan string)
-		failc := make(chan error)
-		donec := make(chan bool)
++Password: something-secret
++Username: something-secret`)
+		warnCount := 0
+		failCount := 0
 
-		go hound.Sniff(fileName, hunk, warnc, failc, donec)
+		smells := make(chan smell)
+		done := make(chan bool)
+
+		go hound.Sniff(fileName, hunk, smells, done)
+
+		for c := 0; c < 1; {
+			select {
+			case s := <-smells:
+				switch s.severity {
+				case 1:
+					warnCount++
+				case 2:
+					failCount++
+				default:
+					t.Fatalf("Should receive smell")
+				}
+			case <-done:
+				c++
+			}
+		}
+
+		if warnCount == 0 {
+			t.Fatalf("Should warn")
+		}
+
+		if failCount == 0 {
+			t.Fatalf("Should fail")
+		}
+	}
+
+	// Should fail
+	{
+		fileName, hunk := getDiff(t, `diff --git a/test2.go b/test2.go
+index 000000..000000 000000
+--- a/test2.go
++++ b/test2.go
+@@ -1,2 +3,4 @@
++Password: something-secret`)
+		smells := make(chan smell)
+		done := make(chan bool)
+
+		go hound.Sniff(fileName, hunk, smells, done)
 
 		select {
-		case <-failc:
-			break
-		case <-warnc:
-			t.Fatalf("Should not warn")
-		case <-donec:
-			t.Fatalf("Should receive message")
+		case s := <-smells:
+			switch s.severity {
+			case 1:
+				t.Fatalf("Should not warn")
+			case 2:
+				t.Logf("Did fail")
+			default:
+				t.Fatalf("Should fail")
+			}
+		case <-done:
+			t.Fatalf("Should receive smell")
 		}
 	}
 
 	// Should pass but output warning
 	{
-		fileName, hunk := getDiff(`diff --git a/test2.go b/test2.go
+		fileName, hunk := getDiff(t, `diff --git a/test3.go b/test3.go
 index 000000..000000 000000
---- a/test2.go
-+++ b/test2.go
+--- a/test3.go
++++ b/test3.go
 @@ -1,2 +3,4 @@
 +Username: something-secret`)
-		warnc := make(chan string)
-		failc := make(chan error)
-		donec := make(chan bool)
+		smells := make(chan smell)
+		done := make(chan bool)
 
-		go hound.Sniff(fileName, hunk, warnc, failc, donec)
+		go hound.Sniff(fileName, hunk, smells, done)
 
 		select {
-		case <-failc:
-			t.Fatalf("Should not fail")
-		case <-warnc:
-			break
-		case <-donec:
-			t.Fatalf("Should receive message")
+		case s := <-smells:
+			switch s.severity {
+			case 1:
+				t.Logf("Did warn")
+			case 2:
+				t.Fatalf("Should not fail")
+			default:
+				t.Fatalf("Should warn")
+			}
+		case <-done:
+			t.Fatalf("Should receive smell")
 		}
 	}
 
 	// Should pass
 	{
-		fileName, hunk := getDiff(`diff --git a/test3.go b/test3.go
+		fileName, hunk := getDiff(t, `diff --git a/test4.go b/test4.go
 index 000000..000000 000000
---- a/test3.go
-+++ b/test3.go
+--- a/test4.go
++++ b/test4.go
 @@ -1,2 +3,4 @@
 +Something that is okay to commit`)
-		warnc := make(chan string)
-		failc := make(chan error)
-		donec := make(chan bool)
+		smells := make(chan smell)
+		done := make(chan bool)
 
-		go hound.Sniff(fileName, hunk, warnc, failc, donec)
+		go hound.Sniff(fileName, hunk, smells, done)
 
 		select {
-		case <-failc:
-			t.Fatal("Should not fail")
-		case <-warnc:
-			t.Fatal("Should not warn")
-		case <-donec:
-			break
+		case s := <-smells:
+			switch s.severity {
+			case 1:
+				t.Fatalf("Should not warn")
+			case 2:
+				t.Fatalf("Should not fail")
+			default:
+				t.Fatalf("Should not receive smell")
+			}
+		case <-done:
+			t.Logf("Did pass")
 		}
 	}
 
 	// Should only pay attention to added lines and pass
 	{
-		fileName, hunk := getDiff(`diff --git a/test4.go b/test4.go
+		fileName, hunk := getDiff(t, `diff --git a/test5.go b/test5.go
 index 000000..000000 000000
---- a/test4.go
-+++ b/test4.go
+--- a/test5.go
++++ b/test5.go
 @@ -1,2 +3,4 @@
 -Password: something-secret`)
-		warnc := make(chan string)
-		failc := make(chan error)
-		donec := make(chan bool)
+		smells := make(chan smell)
+		done := make(chan bool)
 
-		go hound.Sniff(fileName, hunk, warnc, failc, donec)
+		go hound.Sniff(fileName, hunk, smells, done)
 
 		select {
-		case <-failc:
-			t.Fatal("Should not fail")
-		case <-warnc:
-			t.Fatal("Should not warn")
-		case <-donec:
-			break
+		case s := <-smells:
+			switch s.severity {
+			case 1:
+				t.Fatalf("Should not warn")
+			case 2:
+				t.Fatalf("Should not fail")
+			default:
+				t.Fatalf("Should not receive smell")
+			}
+		case <-done:
+			t.Logf("Did pass")
 		}
 	}
 
 	// Should skip even with failures
 	{
-		fileName, hunk := getDiff(`diff --git a/test4.test b/test4.test
+		fileName, hunk := getDiff(t, `diff --git a/test6.test b/test6.test
 index 000000..000000 000000
---- a/test4.test
-+++ b/test4.test
+--- a/test6.test
++++ b/test6.test
 @@ -1,2 +3,4 @@
 +Password: something-secret`)
-		warnc := make(chan string)
-		failc := make(chan error)
-		donec := make(chan bool)
+		smells := make(chan smell)
+		done := make(chan bool)
 
-		go hound.Sniff(fileName, hunk, warnc, failc, donec)
+		go hound.Sniff(fileName, hunk, smells, done)
 
 		select {
-		case <-failc:
-			t.Fatal("Should not fail")
-		case <-warnc:
-			t.Fatal("Should not warn")
-		case <-donec:
-			break
+		case s := <-smells:
+			switch s.severity {
+			case 1:
+				t.Fatalf("Should not warn")
+			case 2:
+				t.Fatalf("Should not fail")
+			default:
+				t.Fatalf("Should not receive message")
+			}
+		case <-done:
+			t.Logf("Did pass")
 		}
 	}
 }
 
-func getDiff(diffContents string) (string, *diff.Hunk) {
-	fileDiff, _ := diff.ParseFileDiff([]byte(diffContents))
+func getDiff(t *testing.T, diffContents string) (string, *diff.Hunk) {
+	fileDiff, err := diff.ParseFileDiff([]byte(diffContents))
+	if err != nil {
+		t.Fatalf("Should parse fileDiff")
+	}
+
 	fileName := fileDiff.NewName
 
 	for _, hunk := range fileDiff.GetHunks() {
