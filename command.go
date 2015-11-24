@@ -1,39 +1,26 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
-	"fmt"
 	"os/exec"
 	"syscall"
 )
 
 // A Command contains the binary executable to be run when executing commands.
 type Command struct {
-	Bin string
+	bin string
 }
 
 // Exec runs the specified command and returns its output and exit code.
 func (c *Command) Exec(cmds ...string) (string, int) {
-	cmd := exec.Command(c.Bin, cmds...)
+	cmd := exec.Command(c.bin, cmds...)
 
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}
+	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 
-	reader, _ := cmd.StdoutPipe()
-	scanner := bufio.NewScanner(reader)
-	go func() {
-		for scanner.Scan() {
-			stdout.WriteString(fmt.Sprintf("%s\n", scanner.Bytes()))
-		}
-	}()
-
-	if err := cmd.Start(); err != nil {
-		return "Failed to spawn command\n", 1
-	}
-
-	if err := cmd.Wait(); err != nil {
+	if err := cmd.Run(); err != nil {
 		code := 1
 
 		// Make sure we catch errors and return the correct exit code, if possible
