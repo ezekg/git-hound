@@ -88,7 +88,7 @@ func (h *Hound) parse(config []byte) error {
 	return yaml.Unmarshal(config, h)
 }
 
-// getRegexp looks for the specified pattern in Hound's regexes cache, and if
+// regexp looks for the specified pattern in Hound's regexes cache, and if
 // it is available, it will fetch from it. If it is not available, it
 // will compile the pattern and store it in the cache. Returns a Regexp
 // and an error.
