@@ -8,6 +8,10 @@ import (
 	"regexp"
 )
 
+var (
+	regexes = make(map[string]*regexp.Regexp)
+)
+
 // A Hound contains the local configuration filename and all regexp patterns
 // used for sniffing git-diffs.
 type Hound struct {
@@ -38,13 +42,13 @@ func (h *Hound) New() bool {
 func (h *Hound) Sniff(fileName string, hunk *diff.Hunk, smells chan<- smell, done chan<- bool) {
 	defer func() { done <- true }()
 
-	rxFileName, _ := regexp.Compile(`^\w+\/`)
+	rxFileName, _ := h.regexp(`^\w+\/`)
 	fileName = rxFileName.ReplaceAllString(fileName, "")
 	if _, ok := h.matchPatterns(h.Skips, []byte(fileName)); ok {
 		return
 	}
 
-	rxModLines, _ := regexp.Compile(`(?m)^\+\s*(.+)$`)
+	rxModLines, _ := h.regexp(`(?m)^\+\s*(.+)$`)
 	matches := rxModLines.FindAllSubmatch(hunk.Body, -1)
 
 	for _, match := range matches {
@@ -84,9 +88,26 @@ func (h *Hound) parse(config []byte) error {
 	return yaml.Unmarshal(config, h)
 }
 
+// getRegexp looks for the specified pattern in Hound's regexes cache, and if
+// it is available, it will fetch from it. If it is not available, it
+// will compile the pattern and store it in the cache. Returns a Regexp
+// and an error.
+func (h *Hound) regexp(pattern string) (*regexp.Regexp, error) {
+	if regexes[pattern] != nil {
+		return regexes[pattern], nil
+	}
+
+	r, err := regexp.Compile(pattern)
+	if err == nil {
+		regexes[pattern] = r
+	}
+
+	return r, err
+}
+
 // match matches a byte array against a regexp pattern and returns a bool.
 func (h *Hound) match(pattern string, subject []byte) bool {
-	r, err := regexp.Compile(pattern)
+	r, err := h.regexp(pattern)
 	if err != nil {
 		panic(err)
 	}
