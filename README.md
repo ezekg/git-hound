@@ -1,6 +1,7 @@
 # Git Hound
 [![Travis](https://img.shields.io/travis/ezekg/git-hound.svg?style=flat-square)](https://travis-ci.org/ezekg/git-hound)
 [![Code Climate](https://img.shields.io/codeclimate/github/ezekg/git-hound.svg?style=flat-square)](https://codeclimate.com/github/ezekg/git-hound)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/ezekg/git-hound)
 
 Hound is a Git plugin that helps prevent sensitive data from being committed into a repository by sniffing potential commits against regular expressions.
 
