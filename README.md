@@ -42,6 +42,7 @@ Please see [Go's regular expression syntax documentation](https://golang.org/pkg
 # Output warning on match but continue
 warn:
   - '(?i)user(name)?\W*[:=,]\W*.+$'
+  - '\/Users\/\w+\/'
 # Fail immediately upon match
 fail:
   - '(?i)db_(user(name)?|pass(word)?|name)\W*[:=,]\W*.+$'
