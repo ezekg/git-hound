@@ -13,13 +13,20 @@ import (
 )
 
 var (
-	noColor = flag.Bool("no-color", false, "Disable color output")
-	config  = flag.String("config", ".githound.yml", "Hound config file")
-	bin     = flag.String("bin", "git", "Executable binary to use for git command")
+	version     = "0.5.2"
+	showVersion = flag.Bool("v", false, "Show version")
+	noColor     = flag.Bool("no-color", false, "Disable color output")
+	config      = flag.String("config", ".githound.yml", "Hound config file")
+	bin         = flag.String("bin", "git", "Executable binary to use for git command")
 )
 
 func main() {
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("%s\n", version)
+		os.Exit(0)
+	}
 
 	if *noColor {
 		color.NoColor = true
