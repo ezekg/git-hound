@@ -6,9 +6,11 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
+	"sync"
 )
 
 var (
+	mutex   = &sync.Mutex{}
 	regexes = make(map[string]*regexp.Regexp)
 )
 
@@ -93,6 +95,12 @@ func (h *Hound) parse(config []byte) error {
 // will compile the pattern and store it in the cache. Returns a Regexp
 // and an error.
 func (h *Hound) regexp(pattern string) (*regexp.Regexp, error) {
+
+	// Ensure that we don't encounter a race condition where multiple goroutines
+	// are attempting to read/write to the regexes map.
+	defer func() { mutex.Unlock() }()
+	mutex.Lock()
+
 	if regexes[pattern] != nil {
 		return regexes[pattern], nil
 	}
