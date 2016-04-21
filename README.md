@@ -20,9 +20,16 @@ go get github.com/ezekg/git-hound
 alias git='_() { if [[ "$1" == "commit" ]]; then git-hound "$@"; else git "$@"; fi }; _'
 ```
 
-## Building
-- To build for your operating system, simply run `go install` from the root of the project directory.
-- To build for all platforms using [`goxc`](https://github.com/laher/goxc), run `goxc -pv=0.5.2 -d=releases/`.
+## Compiling
+To compile for your operating system, simply run the following from the root of the project directory:
+```bash
+go install
+```
+
+To compile for all platforms using [`goxc`](https://github.com/laher/goxc), run the following:
+```bash
+goxc -pv={VERSION} -d=releases/
+```
 
 ## Usage
 ```bash
