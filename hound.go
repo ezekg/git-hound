@@ -31,7 +31,7 @@ func (h *Hound) New() bool {
 		return false
 	}
 
-	err = h.parse(config)
+	err = h.parseConfig(config)
 	if err != nil {
 		return false
 	}
@@ -85,8 +85,8 @@ func (h *Hound) loadConfig() ([]byte, error) {
 	return ioutil.ReadFile(filename)
 }
 
-// parse parses a configuration byte array and returns an error.
-func (h *Hound) parse(config []byte) error {
+// parseConfig parses a configuration byte array and returns an error.
+func (h *Hound) parseConfig(config []byte) error {
 	return yaml.Unmarshal(config, h)
 }
 
@@ -95,11 +95,10 @@ func (h *Hound) parse(config []byte) error {
 // will compile the pattern and store it in the cache. Returns a Regexp
 // and an error.
 func (h *Hound) regexp(pattern string) (*regexp.Regexp, error) {
-
-	// Ensure that we don't encounter a race condition where multiple goroutines
-	// are attempting to read/write to the regexes map.
-	defer func() { mutex.Unlock() }()
+	// Make sure that we don't encounter a race condition where multiple
+	// goroutines a
 	mutex.Lock()
+	defer mutex.Unlock()
 
 	if regexes[pattern] != nil {
 		return regexes[pattern], nil

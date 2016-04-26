@@ -16,8 +16,8 @@ skip:
   - '\.test$'
 `)
 
-	if err := hound.parse(config); err != nil {
-		t.Fatalf("Should parse - %s", err)
+	if err := hound.parseConfig(config); err != nil {
+		t.Fatalf("Should parse config - %s", err)
 	}
 
 	// Should fail with a warning
