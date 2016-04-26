@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	version     = "0.5.2"
+	version     = "0.5.3"
 	showVersion = flag.Bool("v", false, "Show version")
 	noColor     = flag.Bool("no-color", false, "Disable color output")
 	config      = flag.String("config", ".githound.yml", "Hound config file")
@@ -21,6 +21,13 @@ var (
 )
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			color.Red(fmt.Sprintf("error: %s\n", r))
+			os.Exit(1)
+		}
+	}()
+
 	flag.Parse()
 
 	if *showVersion {

@@ -201,6 +201,24 @@ index 000000..000000 000000
 			t.Logf("Did pass")
 		}
 	}
+
+	// Should fail when invalid Yaml is detected
+	{
+		badConfig := []byte(`
+	warn:
+	  - 'string without a closing single quote
+	fail:
+		- 'some other string'
+	skip:
+		- '/bad.go
+	`)
+
+		if err := hound.parseConfig(badConfig); err != nil {
+			t.Logf("Did not parse")
+		} else {
+			t.Fatalf("Should not parse")
+		}
+	}
 }
 
 func getDiff(t *testing.T, diffContents string) (string, *diff.Hunk) {

@@ -33,7 +33,7 @@ func (h *Hound) New() bool {
 
 	err = h.parseConfig(config)
 	if err != nil {
-		return false
+		panic(err)
 	}
 
 	return true
