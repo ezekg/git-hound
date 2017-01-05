@@ -33,18 +33,25 @@ git-hound [<opts>] sniff [<commit>]
 ```
 
 ### Commit
+Sniff changes before committing.
+
 ```bash
 # Scan changes since last commit and pass to git-commit when clean
 git hound commit …
 ```
 
 ### Sniff
+You can optionally pass a commit hash or manually pipe a diff for the Hound to sniff.
+
 ```bash
 # Scan changes since last commit
 git hound sniff HEAD
 
 # Scan entire codebase
 git hound sniff
+
+# Sniff entire repo history
+git log -p | git hound sniff
 ```
 
 ## Option flags

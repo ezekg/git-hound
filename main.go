@@ -8,12 +8,13 @@ import (
 	"flag"
 	"fmt"
 	"github.com/fatih/color"
+	"io/ioutil"
 	"os"
 	"sourcegraph.com/sourcegraph/go-diff/diff"
 )
 
 var (
-	version     = "0.6.0"
+	version     = "0.6.1"
 	showVersion = flag.Bool("v", false, "Show version")
 	noColor     = flag.Bool("no-color", false, "Disable color output")
 	config      = flag.String("config", ".githound.yml", "Hound config file")
@@ -57,14 +58,22 @@ func main() {
 		out, _ = git.Exec("diff", "-U0", "--staged")
 		runnable = true
 	case "sniff":
-		commit := flag.Arg(1)
-		if commit == "" {
-			// NOTE: This let's us get a diff containing the entire history of the repo
-			//       by utilizing a magic commit hash. In reality, it's not magical,
-			//       it's simply the result of sha1("tree 0\0").
-			commit = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+		stat, _ := os.Stdin.Stat()
+
+		// Check if anything was piped to STDIN
+		if (stat.Mode() & os.ModeCharDevice) == 0 {
+			stdin, _ := ioutil.ReadAll(os.Stdin)
+			out = string(stdin)
+		} else {
+			commit := flag.Arg(1)
+			if commit == "" {
+				// NOTE: This let's us get a diff containing the entire repo codebase by
+				//       utilizing a magic commit hash. In reality, it's not magical,
+				//       it's simply the result of sha1("tree 0\0").
+				commit = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+			}
+			out, _ = git.Exec("diff", commit, "--staged")
 		}
-		out, _ = git.Exec("diff", commit, "--staged")
 	default:
 		fmt.Print("Usage:\n  git-hound commit [...]\n  git-hound sniff [commit]\n")
 		os.Exit(0)
