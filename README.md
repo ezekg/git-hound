@@ -28,8 +28,8 @@ gox
 
 ## Usage
 ```
-git-hound [opts] commit [...]
-git-hound [opts] sniff [commit]
+git-hound [<opts>] commit [...]
+git-hound [<opts>] sniff [<commit>]
 ```
 
 ### Commit
