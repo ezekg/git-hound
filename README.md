@@ -15,11 +15,6 @@ To install Hound, please use `go get`. If you don't have Go installed, [get it h
 go get github.com/ezekg/git-hound
 ```
 
-**Alias `git commit` inside `~/.bash(rc|_profile)`:** _(optional)_
-```bash
-alias git='_() { if [[ "$1" == "commit" ]]; then git-hound "$@"; else git "$@"; fi }; _'
-```
-
 ## Compiling
 To compile for your operating system, simply run the following from the root of the project directory:
 ```bash
@@ -32,16 +27,26 @@ goxc -pv={VERSION} -d=releases/
 ```
 
 ## Usage
+
+#### Commit
 ```bash
-git hound commit ...
-git commit ... # When using the optional alias above
+# Scan changes since last commit and pass to git-commit when clean
+git hound commit …
+```
+
+#### Sniff
+```bash
+# Scan changes since last commit
+git hound sniff HEAD
+
+# Scan entire history of repository
+git hound sniff
 ```
 
 ## Option flags
-These flags should be included inside of the `git` alias, if used.
 
 | Flag           | Type   | Default         | Usage                                      |
-| :------------- | :----- | :-------------- | :----------------------------------------- |
+|:---------------|:-------|:----------------|:-------------------------------------------|
 | `-no-color`    | bool   | `false`         | Disable color output                       |
 | `-config=file` | string | `.githound.yml` | Hound config file                          |
 | `-bin=file`    | string | `git`           | Executable binary to use for `git` command |

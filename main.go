@@ -7,13 +7,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/ezekg/git-hound/Godeps/_workspace/src/github.com/fatih/color"
-	"github.com/ezekg/git-hound/Godeps/_workspace/src/sourcegraph.com/sourcegraph/go-diff/diff"
+	"github.com/fatih/color"
 	"os"
+	"sourcegraph.com/sourcegraph/go-diff/diff"
 )
 
 var (
-	version     = "0.5.3"
+	version     = "0.6.0"
 	showVersion = flag.Bool("v", false, "Show version")
 	noColor     = flag.Bool("no-color", false, "Disable color output")
 	config      = flag.String("config", ".githound.yml", "Hound config file")
@@ -42,65 +42,92 @@ func main() {
 	hound := &Hound{config: *config}
 	git := &Command{bin: *bin}
 
-	if ok := hound.New(); ok {
-		out, _ := git.Exec("diff", "-U0", "--staged")
-		fileDiffs, err := diff.ParseMultiFileDiff([]byte(out))
-		if err != nil {
-			color.Red(fmt.Sprintf("%s\n", err))
-			os.Exit(1)
+	if ok := hound.New(); !ok {
+		color.Red("No config file detected")
+		os.Exit(1)
+	}
+
+	var (
+		runnable bool
+		out      string
+	)
+
+	switch flag.Arg(0) {
+	case "commit":
+		out, _ = git.Exec("diff", "-U0", "--staged")
+		runnable = true
+	case "sniff":
+		commit := flag.Arg(1)
+		if commit == "" {
+			// NOTE: This let's us get a diff containing the entire history of the repo
+			//       by utilizing a magic commit hash. In reality, it's not magical,
+			//       it's simply the result of sha1("tree 0\0").
+			commit = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 		}
+		out, _ = git.Exec("diff", commit, "--staged")
+	default:
+		color.Red("Usage:\n  git-hound commit [...]\n  git-hound sniff [commit]")
+		os.Exit(1)
+	}
 
-		severeSmellCount := 0
-		hunkCount := 0
+	fileDiffs, err := diff.ParseMultiFileDiff([]byte(out))
+	if err != nil {
+		color.Red(fmt.Sprintf("%s\n", err))
+		os.Exit(1)
+	}
 
-		smells := make(chan smell)
-		done := make(chan bool)
+	severeSmellCount := 0
+	hunkCount := 0
 
-		for _, fileDiff := range fileDiffs {
-			fileName := fileDiff.NewName
-			hunks := fileDiff.GetHunks()
+	smells := make(chan smell)
+	done := make(chan bool)
 
-			for _, hunk := range hunks {
-				go func(hunk *diff.Hunk) {
-					defer func() {
-						if r := recover(); r != nil {
-							color.Red(fmt.Sprintf("%s\n", r))
-							os.Exit(1)
-						}
-					}()
-					hound.Sniff(fileName, hunk, smells, done)
-				}(hunk)
-				hunkCount++
-			}
-		}
+	for _, fileDiff := range fileDiffs {
+		fileName := fileDiff.NewName
+		hunks := fileDiff.GetHunks()
 
-		for c := 0; c < hunkCount; {
-			select {
-			case s := <-smells:
-				if s.severity > 1 {
-					severeSmellCount++
-				}
-
-				switch s.severity {
-				case 1:
-					color.Yellow(fmt.Sprintf("warning: %s\n", s.String()))
-				case 2:
-					color.Red(fmt.Sprintf("failure: %s\n", s.String()))
-				default:
-					color.Red(fmt.Sprintf("error: unknown severity given - %d\n", s.severity))
-				}
-			case <-done:
-				c++
-			}
-		}
-
-		if severeSmellCount > 0 {
-			fmt.Printf("%d severe smell(s) detected - please fix them before you can commit\n", severeSmellCount)
-			os.Exit(1)
+		for _, hunk := range hunks {
+			go func(hunk *diff.Hunk) {
+				defer func() {
+					if r := recover(); r != nil {
+						color.Red(fmt.Sprintf("%s\n", r))
+						os.Exit(1)
+					}
+				}()
+				hound.Sniff(fileName, hunk, smells, done)
+			}(hunk)
+			hunkCount++
 		}
 	}
 
-	out, code := git.Exec(flag.Args()...)
-	fmt.Print(out)
-	os.Exit(code)
+	for c := 0; c < hunkCount; {
+		select {
+		case s := <-smells:
+			if s.severity > 1 {
+				severeSmellCount++
+			}
+
+			switch s.severity {
+			case 1:
+				color.Yellow(fmt.Sprintf("warning: %s\n", s.String()))
+			case 2:
+				color.Red(fmt.Sprintf("failure: %s\n", s.String()))
+			default:
+				color.Red(fmt.Sprintf("error: unknown severity given - %d\n", s.severity))
+			}
+		case <-done:
+			c++
+		}
+	}
+
+	if severeSmellCount > 0 {
+		fmt.Printf("%d severe smell(s) detected - please fix them before you can commit\n", severeSmellCount)
+		os.Exit(1)
+	}
+
+	if runnable {
+		out, code := git.Exec(flag.Args()...)
+		fmt.Print(out)
+		os.Exit(code)
+	}
 }
