@@ -43,7 +43,7 @@ git hound commit …
 # Scan changes since last commit
 git hound sniff HEAD
 
-# Scan entire history of repository
+# Scan entire codebase
 git hound sniff
 ```
 
