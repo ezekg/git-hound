@@ -21,9 +21,9 @@ To compile for your operating system, simply run the following from the root of 
 go install
 ```
 
-To compile for all platforms using [`goxc`](https://github.com/laher/goxc), run the following:
+To compile for all platforms using [`gox`](https://github.com/mitchellh/gox), run the following:
 ```bash
-goxc -pv={VERSION} -d=releases/
+gox
 ```
 
 ## Usage
