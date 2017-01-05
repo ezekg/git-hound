@@ -27,14 +27,18 @@ gox
 ```
 
 ## Usage
+```
+git-hound [opts] commit [...]
+git-hound [opts] sniff [commit]
+```
 
-#### Commit
+### Commit
 ```bash
 # Scan changes since last commit and pass to git-commit when clean
 git hound commit …
 ```
 
-#### Sniff
+### Sniff
 ```bash
 # Scan changes since last commit
 git hound sniff HEAD
