@@ -1,5 +1,0 @@
-{
-	"ArtifactsDest": "releases",
-	"BuildConstraints": "linux windows darwin freebsd netbsd",
-	"ConfigVersion": "0.9"
-}
