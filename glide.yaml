@@ -1,0 +1,11 @@
+package: github.com/ezekg/git-hound
+import:
+- package: github.com/dlclark/regexp2
+  version: v1.1.1
+- package: github.com/fatih/color
+  version: v1.2
+- package: gopkg.in/yaml.v2
+- package: sourcegraph.com/sourcegraph/go-diff
+  version: 7eefa0faf57871a70d7a2c368a454593f07797bc
+  subpackages:
+  - diff

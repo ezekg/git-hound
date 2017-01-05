@@ -1,0 +1,30 @@
+hash: 6e457125812384c7308761c27eb647548eeec762c27cea984ab33b536f229297
+updated: 2017-01-05T15:04:10.695531688-06:00
+imports:
+- name: github.com/dlclark/regexp2
+  version: 4009c9dc49dd8906bfd4d479c255470d6a477ce5
+  subpackages:
+  - syntax
+- name: github.com/fatih/color
+  version: 34e4ee095d12986a2cef5ddb9aeb3b8cfcfea17c
+- name: github.com/gogo/protobuf
+  version: f9114dace7bd920b32f943b3c73fafbcbab2bf31
+  subpackages:
+  - proto
+- name: github.com/mattn/go-colorable
+  version: d228849504861217f796da67fae4f6e347643f15
+- name: github.com/mattn/go-isatty
+  version: 30a891c33c7cde7b02a981314b4228ec99380cca
+- name: golang.org/x/sys
+  version: d75a52659825e75fff6158388dddc6a5b04f9ba5
+  subpackages:
+  - unix
+- name: gopkg.in/yaml.v2
+  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
+- name: sourcegraph.com/sourcegraph/go-diff
+  version: 7eefa0faf57871a70d7a2c368a454593f07797bc
+  subpackages:
+  - diff
+- name: sourcegraph.com/sqs/pbtypes
+  version: 4d1b9dc7ffc3f7b555de9b02055fa616f0ebcd18
+testImports: []
