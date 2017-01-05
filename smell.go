@@ -9,7 +9,7 @@ import (
 type smell struct {
 	pattern  string
 	fileName string
-	line     []byte
+	line     string
 	lineNum  int32
 	severity int
 }

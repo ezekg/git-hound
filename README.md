@@ -3,7 +3,7 @@
 [![Code Climate](https://img.shields.io/codeclimate/github/ezekg/git-hound.svg?style=flat-square)](https://codeclimate.com/github/ezekg/git-hound)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/ezekg/git-hound)
 
-Hound is a Git plugin that helps prevent sensitive data from being committed into a repository by sniffing potential commits against regular expressions.
+Hound is a Git plugin that helps prevent sensitive data from being committed into a repository by sniffing potential commits against PCRE regular expressions.
 
 ## How does it work?
 Upon commit, it runs the output of `git diff -U0 --staged` through the Hound, which matches every _added_ or _modified_ line against your provided list of regular expressions from a local `.githound.yml` file.
@@ -52,7 +52,6 @@ git hound sniff
 | `-bin=file`    | string | `git`           | Executable binary to use for `git` command |
 
 ## Example `.githound.yml`
-Please see [Go's regular expression syntax documentation](https://golang.org/pkg/regexp/syntax/) for usage options.
 
 ```yaml
 # Output warning on match but continue
@@ -61,6 +60,7 @@ warn:
   - '\/Users\/\w+\/'
 # Fail immediately upon match
 fail:
+  - '(?!.*[\s])(?=.*[A-Za-z])(?=.*[0-9])(?=.*[!@#$&*])?.{16,}'
   - '(?i)db_(user(name)?|pass(word)?|name)\W*[:=,]\W*.+$'
   - '(?i)pass(word)?\W*[:=,]\W*.+$'
 # Skip on matched filename

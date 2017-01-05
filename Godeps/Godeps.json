@@ -1,11 +1,29 @@
 {
 	"ImportPath": "github.com/ezekg/git-hound",
-	"GoVersion": "go1.5.1",
+	"GoVersion": "go1.7.4",
 	"Deps": [
+		{
+			"ImportPath": "github.com/dlclark/regexp2",
+			"Comment": "v1.1.1",
+			"Rev": "4009c9dc49dd8906bfd4d479c255470d6a477ce5"
+		},
 		{
 			"ImportPath": "github.com/fatih/color",
 			"Comment": "v0.1-10-g8640971",
 			"Rev": "8640971291e54b520f781270275b7ed8762ac909"
+		},
+		{
+			"ImportPath": "github.com/gogo/protobuf/proto",
+			"Comment": "v0.1-60-g735a711",
+			"Rev": "735a7119638333b86cc87394bbac13e670fd5427"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-isatty",
+			"Rev": "d6aaa2f596ae91a0a58d8e7f2c79670991468e4f"
+		},
+		{
+			"ImportPath": "github.com/shiena/ansicolor",
+			"Rev": "d445752f6f66f9cd987722f109149f6799cdf1de"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
@@ -14,6 +32,10 @@
 		{
 			"ImportPath": "sourcegraph.com/sourcegraph/go-diff/diff",
 			"Rev": "7eefa0faf57871a70d7a2c368a454593f07797bc"
+		},
+		{
+			"ImportPath": "sourcegraph.com/sqs/pbtypes",
+			"Rev": "588352d106ca472fa2a91b2425b8e35b52e3822e"
 		}
 	]
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ezekg/git-hound/Godeps/_workspace/src/sourcegraph.com/sourcegraph/go-diff/diff"
+	"sourcegraph.com/sourcegraph/go-diff/diff"
 	"testing"
 )
 
