@@ -66,8 +66,8 @@ func main() {
 		}
 		out, _ = git.Exec("diff", commit, "--staged")
 	default:
-		color.Red("Usage:\n  git-hound commit [...]\n  git-hound sniff [commit]")
-		os.Exit(1)
+		fmt.Print("Usage:\n  git-hound commit [...]\n  git-hound sniff [commit]\n")
+		os.Exit(0)
 	}
 
 	fileDiffs, err := diff.ParseMultiFileDiff([]byte(out))
