@@ -71,7 +71,7 @@ warn:
   - '\/Users\/\w+\/'
 # Fail immediately upon match
 fail:
-  - '(?!.*[\s])(?=.*[A-Za-z])(?=.*[0-9])(?=.*[!@#$&*])?.{16,}'
+  - '[''"](?!.*[\s])(?=.*[A-Za-z])(?=.*[0-9])(?=.*[!@#$&*])?.{16,}[''"]'
   - '(?i)db_(user(name)?|pass(word)?|name)\W*[:=,]\W*.+$'
   - '(?i)pass(word)?\W*[:=,]\W*.+$'
 # Skip on matched filename
