@@ -18,7 +18,17 @@ go get github.com/ezekg/git-hound
 ## Compiling
 To compile for your operating system, simply run the following from the root of the project directory:
 ```bash
+# Get Repo
+git clone https://github.com/ezekg/git-hound.git
+cd git-hound
+
+# Setup Golang Config
+export GOPATH=`pwd`
+export GOBIN=${GOPATH}/bin
+
+# Build Binary & Execute
 go install
+${GOBIN}/git-hound
 ```
 
 To compile for all platforms using [`gox`](https://github.com/mitchellh/gox), run the following:
