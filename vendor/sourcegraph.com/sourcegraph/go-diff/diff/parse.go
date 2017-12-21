@@ -53,14 +53,21 @@ func (r *MultiFileDiffReader) ReadFile() (*FileDiff, error) {
 	}
 	r.nextFileFirstLine = nil
 
-	d, err := fr.ReadAllHeaders()
+	fd, err := fr.ReadAllHeaders()
 	if err != nil {
-		if e0, ok := err.(*ParseError); ok {
-			if e0.Err == ErrNoFileHeader || e0.Err == ErrExtendedHeadersEOF {
+		switch e := err.(type) {
+		case *ParseError:
+			if e.Err == ErrNoFileHeader || e.Err == ErrExtendedHeadersEOF {
 				return nil, io.EOF
 			}
+
+		case OverflowError:
+			r.nextFileFirstLine = []byte(e)
+			return fd, nil
+
+		default:
+			return nil, err
 		}
-		return nil, err
 	}
 
 	// Before reading hunks, check to see if there are any. If there
@@ -72,12 +79,12 @@ func (r *MultiFileDiffReader) ReadFile() (*FileDiff, error) {
 	hr := fr.HunksReader()
 	line, err := readLine(r.reader)
 	if err != nil {
-		return d, err
+		return fd, err
 	}
 	line = bytes.TrimSuffix(line, []byte{'\n'})
 	if bytes.HasPrefix(line, hunkPrefix) {
 		hr.nextHunkHeaderLine = line
-		d.Hunks, err = hr.ReadAllHunks()
+		fd.Hunks, err = hr.ReadAllHunks()
 		r.line = fr.line
 		r.offset = fr.offset
 		if err != nil {
@@ -86,7 +93,7 @@ func (r *MultiFileDiffReader) ReadFile() (*FileDiff, error) {
 					// This just means we finished reading the hunks for the
 					// current file. See the ErrBadHunkLine doc for more info.
 					r.nextFileFirstLine = e.Line
-					return d, nil
+					return fd, nil
 				}
 			}
 			return nil, err
@@ -97,7 +104,7 @@ func (r *MultiFileDiffReader) ReadFile() (*FileDiff, error) {
 		r.nextFileFirstLine = line
 	}
 
-	return d, nil
+	return fd, nil
 }
 
 // ReadAllFiles reads all file unified diffs (including headers and all
@@ -147,17 +154,17 @@ type FileDiffReader struct {
 
 // Read reads a file unified diff, including headers and hunks, from r.
 func (r *FileDiffReader) Read() (*FileDiff, error) {
-	d, err := r.ReadAllHeaders()
+	fd, err := r.ReadAllHeaders()
 	if err != nil {
 		return nil, err
 	}
 
-	d.Hunks, err = r.HunksReader().ReadAllHunks()
+	fd.Hunks, err = r.HunksReader().ReadAllHunks()
 	if err != nil {
 		return nil, err
 	}
 
-	return d, nil
+	return fd, nil
 }
 
 // ReadAllHeaders reads the file headers and extended headers (if any)
@@ -170,8 +177,17 @@ func (r *FileDiffReader) ReadAllHeaders() (*FileDiff, error) {
 	fd := &FileDiff{}
 
 	fd.Extended, err = r.ReadExtendedHeaders()
-	if err != nil {
-		return nil, err
+	if pe, ok := err.(*ParseError); ok && pe.Err == ErrExtendedHeadersEOF {
+		wasEmpty := handleEmpty(fd)
+		if wasEmpty {
+			return fd, nil
+		}
+		return fd, err
+	} else if _, ok := err.(OverflowError); ok {
+		handleEmpty(fd)
+		return fd, err
+	} else if err != nil {
+		return fd, err
 	}
 
 	var origTime, newTime *time.Time
@@ -246,11 +262,12 @@ func (r *FileDiffReader) readOneFileHeader(prefix []byte) (filename string, time
 	r.line++
 	line = line[len(prefix):]
 
-	parts := bytes.SplitN(line, []byte("\t"), 2)
-	filename = string(parts[0])
+	trimmedLine := strings.TrimSpace(string(line)) // filenames that contain spaces may be terminated by a tab
+	parts := strings.SplitN(trimmedLine, "\t", 2)
+	filename = parts[0]
 	if len(parts) == 2 {
 		// Timestamp is optional, but this header has it.
-		ts, err := time.Parse(diffTimeFormat, string(parts[1]))
+		ts, err := time.Parse(diffTimeParseLayout, parts[1])
 		if err != nil {
 			return "", nil, err
 		}
@@ -260,13 +277,20 @@ func (r *FileDiffReader) readOneFileHeader(prefix []byte) (filename string, time
 	return filename, timestamp, err
 }
 
-var i = 0
+// OverflowError is returned when we have overflowed into the start
+// of the next file while reading extended headers.
+type OverflowError string
+
+func (e OverflowError) Error() string {
+	return fmt.Sprintf("overflowed into next file: %s", e)
+}
 
 // ReadExtendedHeaders reads the extended header lines, if any, from a
 // unified diff file (e.g., git's "diff --git a/foo.go b/foo.go", "new
 // mode <mode>", "rename from <path>", etc.).
 func (r *FileDiffReader) ReadExtendedHeaders() ([]string, error) {
 	var xheaders []string
+	firstLine := true
 	for {
 		var line []byte
 		if r.fileHeaderLine == nil {
@@ -282,6 +306,13 @@ func (r *FileDiffReader) ReadExtendedHeaders() ([]string, error) {
 			r.fileHeaderLine = nil
 		}
 
+		if bytes.HasPrefix(line, []byte("diff --git ")) {
+			if firstLine {
+				firstLine = false
+			} else {
+				return xheaders, OverflowError(line)
+			}
+		}
 		if bytes.HasPrefix(line, []byte("--- ")) {
 			// We've reached the file header.
 			r.fileHeaderLine = line // pass to readOneFileHeader (see fileHeaderLine field doc)
@@ -291,6 +322,39 @@ func (r *FileDiffReader) ReadExtendedHeaders() ([]string, error) {
 		r.line++
 		r.offset += int64(len(line))
 		xheaders = append(xheaders, string(line))
+	}
+}
+
+// handleEmpty detects when FileDiff was an empty diff and will not have any hunks
+// that follow. It updates fd fields from the parsed extended headers.
+func handleEmpty(fd *FileDiff) (wasEmpty bool) {
+	switch {
+	case (len(fd.Extended) == 3 || len(fd.Extended) == 4 && strings.HasPrefix(fd.Extended[3], "Binary files ")) &&
+		strings.HasPrefix(fd.Extended[1], "new file mode ") && strings.HasPrefix(fd.Extended[0], "diff --git "):
+
+		names := strings.SplitN(fd.Extended[0][len("diff --git "):], " ", 2)
+		fd.OrigName = "/dev/null"
+		fd.NewName = names[1]
+		return true
+	case (len(fd.Extended) == 3 || len(fd.Extended) == 4 && strings.HasPrefix(fd.Extended[3], "Binary files ")) &&
+		strings.HasPrefix(fd.Extended[1], "deleted file mode ") && strings.HasPrefix(fd.Extended[0], "diff --git "):
+
+		names := strings.SplitN(fd.Extended[0][len("diff --git "):], " ", 2)
+		fd.OrigName = names[0]
+		fd.NewName = "/dev/null"
+		return true
+	case len(fd.Extended) == 4 && strings.HasPrefix(fd.Extended[2], "rename from ") && strings.HasPrefix(fd.Extended[3], "rename to ") && strings.HasPrefix(fd.Extended[0], "diff --git "):
+		names := strings.SplitN(fd.Extended[0][len("diff --git "):], " ", 2)
+		fd.OrigName = names[0]
+		fd.NewName = names[1]
+		return true
+	case len(fd.Extended) == 3 && strings.HasPrefix(fd.Extended[2], "Binary files ") && strings.HasPrefix(fd.Extended[0], "diff --git "):
+		names := strings.SplitN(fd.Extended[0][len("diff --git "):], " ", 2)
+		fd.OrigName = names[0]
+		fd.NewName = names[1]
+		return true
+	default:
+		return false
 	}
 }
 

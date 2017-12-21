@@ -36,6 +36,10 @@ func PrintFileDiff(d *FileDiff) ([]byte, error) {
 		}
 	}
 
+	if d.Hunks == nil {
+		return buf.Bytes(), nil
+	}
+
 	if err := printFileHeader(&buf, "--- ", d.OrigName, timePtr(d.OrigTime)); err != nil {
 		return nil, err
 	}
@@ -67,7 +71,7 @@ func printFileHeader(w io.Writer, prefix string, filename string, timestamp *tim
 		return err
 	}
 	if timestamp != nil {
-		if _, err := fmt.Fprint(w, "\t", timestamp.Format(diffTimeFormat)); err != nil {
+		if _, err := fmt.Fprint(w, "\t", timestamp.Format(diffTimeFormatLayout)); err != nil {
 			return err
 		}
 	}

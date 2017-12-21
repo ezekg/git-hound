@@ -229,7 +229,7 @@ func getDiff(t *testing.T, diffContents string) (string, *diff.Hunk) {
 
 	fileName := fileDiff.NewName
 
-	for _, hunk := range fileDiff.GetHunks() {
+	for _, hunk := range fileDiff.Hunks {
 		return fileName, hunk
 	}
 
