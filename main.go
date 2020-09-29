@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	version     = "0.6.2"
+	version     = "1.0.0"
 	showVersion = flag.Bool("v", false, "Show version")
 	noColor     = flag.Bool("no-color", false, "Disable color output")
 	config      = flag.String("config", ".githound.yml", "Hound config file")
