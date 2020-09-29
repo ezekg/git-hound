@@ -1,0 +1,17 @@
+github.com/dlclark/regexp2 v1.1.1 h1:/ABn3mAhHTzHd5qE3S6gaCypX1ou5yQYGo2I7oq/E54=
+github.com/dlclark/regexp2 v1.1.1/go.mod h1:2pZnwuY/m+8K6iRw6wQdMtk+rH5tNGR1i55kozfMjCc=
+github.com/fatih/color v1.1.1-0.20170103160630-34e4ee095d12 h1:AmfUkJtRbNpji0BZS+j+iGOKMu/ttcajZDHXWEn5Qrg=
+github.com/fatih/color v1.1.1-0.20170103160630-34e4ee095d12/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
+github.com/gogo/protobuf v0.0.0-20170307180453-100ba4e88506 h1:zDlw+wgyXdfkRuvFCdEDUiPLmZp2cvf/dWHazY0a5VM=
+github.com/gogo/protobuf v0.0.0-20170307180453-100ba4e88506/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
+github.com/mattn/go-colorable v0.0.7 h1:zh4kz16dcPG+l666m12h0+dO2HGnQ1ngy7crMErE2UU=
+github.com/mattn/go-colorable v0.0.7/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
+github.com/mattn/go-isatty v0.0.0-20161123143637-30a891c33c7c h1:YHHK/dEmr2Jo1cWD1VMB2waEeHJhHFp3CEylwWy/VcY=
+github.com/mattn/go-isatty v0.0.0-20161123143637-30a891c33c7c/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
+golang.org/x/sys v0.0.0-20170303135930-e48874b42435/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+gopkg.in/yaml.v2 v2.0.0-20160928153709-a5b47d31c556 h1:hKXbLW5oaJoQgs8KrzTLdF4PoHi+0oQPgea9TNtvE3E=
+gopkg.in/yaml.v2 v2.0.0-20160928153709-a5b47d31c556/go.mod h1:JAlM8MvJe8wmxCU4Bli9HhUf9+ttbYbLASfIpnQbh74=
+sourcegraph.com/sourcegraph/go-diff v0.0.0-20171119081133-3f415a150aec h1:wAAdENPXC7bE1oxY4VqSDdhaA+XQ8TgQHsZMMnrXjEk=
+sourcegraph.com/sourcegraph/go-diff v0.0.0-20171119081133-3f415a150aec/go.mod h1:R09mWeb9JcPbO+A3cYDc11xjz0wp6r9+KnqdqROAoRU=
+sourcegraph.com/sqs/pbtypes v0.0.0-20160107090929-4d1b9dc7ffc3 h1:hXy8YsgVLDz5mlngKhNHQhAsAGrSp3dlXZN4b0/4UUI=
+sourcegraph.com/sqs/pbtypes v0.0.0-20160107090929-4d1b9dc7ffc3/go.mod h1:ketZ/q3QxT9HOBeFhu6RdvsftgpsbFHBF5Cas6cDKZ0=
