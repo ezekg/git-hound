@@ -15,6 +15,12 @@ To install Hound, please use `go get`. If you don't have Go installed, [get it h
 go get github.com/ezekg/git-hound
 ```
 
+If you're on macOS, you can also install using Homebrew:
+
+```
+brew install git-hound
+```
+
 ## Compiling
 To compile for your operating system, simply run the following from the root of the project directory:
 ```bash
